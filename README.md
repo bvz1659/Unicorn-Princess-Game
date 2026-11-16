@@ -29,7 +29,7 @@ node tools/record-server.js        # also serves the game
 
 - **Free Draw**: marker, crayon, rainbow and sparkle brushes, eraser, paint bucket, 3 sizes, undo.
 - **Colouring Pages**: pick a category (🦖 dinosaurs, 🐱 animals, 🧜‍♀️ mermaids, 🦄 unicorns, 🐠 ocean, 🚀 space, 🚗 vehicles, 🌸 garden) and a picture. Every picture is drawn by the game, so the 🎲 button makes a new variation each time. Tap a shape to fill it, or paint with the brushes.
-- **My Photo**: choose or take a photo and the game turns it into a black and white colouring page (🔍 changes how detailed it is). The photo never leaves the phone.
+- **My Photo**: choose or take a photo. The game works out whether it is a **line drawing** (it keeps the original lines, cleans specks, and the paint bucket will not spill through small gaps) or a **photo** (it turns it into outlined shapes). 🪄 switches between the two styles and 🔍 changes the line thickness or detail. The photo never leaves the phone.
 - **Colour wheel** (the 🎨 swatch): drag on the wheel to mix any colour, slide for lighter or darker. Your mixed colours are remembered.
 - 💾 saves or shares the finished picture (the share sheet on iPhone, a download elsewhere).
 
