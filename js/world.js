@@ -232,7 +232,8 @@ cv.addEventListener('pointermove',e=>{if(held&&e.pointerId===ptrId){ptr.x=e.clie
 const rel=e=>{if(e.pointerId!==ptrId)return;held=false;
   if(S.build&&bt){const tap=!bt.moved&&performance.now()-bt.t<450;const p=toWorld(bt.x,bt.y);bt=null;if(tap){P.tx=null;placeAt(p)}}};
 cv.addEventListener('pointerup',rel);cv.addEventListener('pointercancel',rel);
-document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+// block page scrolling/bounce during play, but let scrollable menus (hub, pickers) scroll
+document.addEventListener('touchmove',e=>{if(e.target.closest&&e.target.closest('#hub,.acard,#mbox,#apick'))return;e.preventDefault()},{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault());
 // Safari ignores user-scalable=no: stop a quick double-tap from zooming the page (little fingers tap fast)
 let lastTE=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-lastTE<350&&e.cancelable)e.preventDefault();lastTE=n},{passive:false});

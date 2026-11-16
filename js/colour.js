@@ -23,7 +23,12 @@ function rgb2hsv(r,g2,b){r/=255;g2/=255;b/=255;const mx=Math.max(r,g2,b),mn=Math
 /* ---------- DOM ---------- */
 let built=false,pc,lc,pctx,lctx,tray;
 function el(tag,cls,txt,parent){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;if(parent)parent.appendChild(e);return e}
-function tap(b,fn){b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ML.unlock();fn(e,b)})}
+function tap(b,fn){
+  let sx=0,sy=0,id=null,t0=0;
+  b.addEventListener('pointerdown',e=>{e.stopPropagation();ML.unlock();sx=e.clientX;sy=e.clientY;id=e.pointerId;t0=Date.now()});
+  b.addEventListener('pointerup',e=>{if(e.pointerId!==id)return;id=null;e.stopPropagation();e.preventDefault();if(Math.hypot(e.clientX-sx,e.clientY-sy)<14&&Date.now()-t0<900)fn(e,b)});
+  b.addEventListener('pointercancel',()=>{id=null});
+}
 
 function build(){
   if(built)return;built=true;

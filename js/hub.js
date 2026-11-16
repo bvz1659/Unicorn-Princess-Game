@@ -16,7 +16,12 @@ Hub.extras=[
   {icon:'📷',name:'My Photo',color:['#8fd3ff','#6a8dff'],go:()=>Art.open('photo')}
 ];
 function el(tag,cls,txt,parent){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;if(parent)parent.appendChild(e);return e}
-function tap(b,fn){b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ML.unlock();fn(e)})}
+function tap(b,fn){
+  let sx=0,sy=0,id=null,t0=0;
+  b.addEventListener('pointerdown',e=>{e.stopPropagation();ML.unlock();sx=e.clientX;sy=e.clientY;id=e.pointerId;t0=Date.now()});
+  b.addEventListener('pointerup',e=>{if(e.pointerId!==id)return;id=null;e.stopPropagation();e.preventDefault();if(Math.hypot(e.clientX-sx,e.clientY-sy)<14&&Date.now()-t0<900)fn(e,b)});
+  b.addEventListener('pointercancel',()=>{id=null});
+}
 
 Hub.open=function(){
   const S=ML.S;
