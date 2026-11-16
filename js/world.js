@@ -234,6 +234,8 @@ const rel=e=>{if(e.pointerId!==ptrId)return;held=false;
 cv.addEventListener('pointerup',rel);cv.addEventListener('pointercancel',rel);
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault());
+// Safari ignores user-scalable=no: stop a quick double-tap from zooming the page (little fingers tap fast)
+let lastTE=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-lastTE<350&&e.cancelable)e.preventDefault();lastTE=n},{passive:false});
 document.addEventListener('contextmenu',e=>e.preventDefault());
 
 function tapAt(w){
