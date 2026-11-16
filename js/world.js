@@ -161,17 +161,26 @@ function speechUnlock(){   // phones only allow speech once it has been started 
   if(speechOK||!('speechSynthesis' in window))return;speechOK=true;
   try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}
 }
+const DBG=[];
+function dbg(m){DBG.push(new Date().toTimeString().slice(3,8)+' '+m);if(DBG.length>14)DBG.shift()}
 function say(txt){
-  if(!S.sound)return;
-  if(window.Voice&&Voice.say(txt))return;
+  dbg('say: '+txt);
+  if(window.ML&&ML.caption)ML.caption(txt);          // always show the words on screen too
+  if(!S.sound){dbg(' muted');return}
+  if(window.Voice&&Voice.say(txt)){dbg(' -> recording');return}
   if(window.Voice)Voice.stop();
-  if(!('speechSynthesis' in window))return;
+  if(!('speechSynthesis' in window)){dbg(' no speechSynthesis');return}
   try{
-    if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();
-    if(speechSynthesis.paused)speechSynthesis.resume();
-    const u=new SpeechSynthesisUtterance(txt);if(!voice)pickVoice();u.pitch=1.75;u.rate=.95;u.volume=1;u.lang=voice?voice.lang:'en-GB';if(voice)u.voice=voice;
-    setTimeout(()=>{try{speechSynthesis.speak(u)}catch(e){}},80);
-  }catch(e){}
+    const ss=speechSynthesis;
+    if(!voice)pickVoice();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.pitch=1.5;u.rate=.95;u.volume=1;
+    if(voice){u.voice=voice;u.lang=voice.lang}          // only set a language when we really have a matching voice
+    u.onerror=e=>dbg(' tts error: '+(e.error||'?'));u.onstart=()=>dbg(' tts started');
+    window.__utt=u;                                     // keep a reference so it is not garbage collected mid-sentence
+    const go=()=>{try{ss.resume();ss.speak(u)}catch(e){dbg(' speak threw '+e.message)}};
+    if(ss.speaking||ss.pending){ss.cancel();setTimeout(go,120)}else go();
+  }catch(e){dbg(' say threw '+e.message)}
 }
 
 /* ---------- particles & timers ---------- */
@@ -1337,7 +1346,7 @@ cam.x=clamp(P.x-W/Z/2,0,WW);cam.y=clamp(P.y-H/Z*.55,0,WH);
 requestAnimationFrame(frame);
 
 // bridge for the learning games (js/engine.js, js/hub.js, js/games/*)
-window.ML={setSound,S,P,audio:()=>AC?{ac:AC,out:master}:null,say,sfx,tone,nf,now,toast,unlock,save,hud,burst,hearts,confetti,questEvent,pick,shuffle,
+window.ML={dbgLog:()=>DBG,dbg,setSound,S,P,audio:()=>AC?{ac:AC,out:master}:null,say,sfx,tone,nf,now,toast,unlock,save,hud,burst,hearts,confetti,questEvent,pick,shuffle,
   addStarsQuiet:n=>{S.stars+=n;hud();save()}};
 // debug hook for testing
 window.__game={S,P,animals,flowers,choose,Q,WX,questEvent,openLearn,startRace,startSeek,startShower,enterCave,enterBuild,openPet,pads,DOORS,CAVE,SCHOOL,DF};

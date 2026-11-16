@@ -148,11 +148,10 @@ Stage.lvOf=lvOf;
 /* say(...ids): recorded clips when we have them, otherwise the phone voice reads the same words */
 function say(){
   const ids=[].concat.apply([],[].slice.call(arguments));
-  if(!ML.S.sound)return;
   const V=g.Voice;
   const text=ids.map(i=>{const p=g.PHRASES.find(x=>x.id===i);return p?p.text.replace(/[!?]/g,''):String(i)}).join(' ');
-  if(V&&ids.every(i=>V.has(i))){V.sayIds(ids);return}
-  ML.say(text);   // ML.say falls back to the phone voice
+  if(ML.S.sound&&V&&ids.every(i=>V.has(i))){ML.caption(text);ML.dbg('say clips: '+text);V.sayIds(ids);return}
+  ML.say(text);   // shows the caption, then uses the phone voice if there is no recording
 }
 function numWords(n){return g.Voice.numIds(n)||['n'+n]}
 
@@ -234,6 +233,16 @@ function loop(now){
 }
 $('gexit').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ML.sfx.pop();Stage.close()});
 $('gsay').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ML.unlock();if(promptFn)promptFn()});
+
+/* on-screen caption: the words of every spoken line, so the game still has directions if the sound is off or fails */
+let capT=0;
+ML.caption=function(text){
+  if(ML.S.scene!=='games')return;
+  const e=$('gcap');if(!e)return;
+  e.textContent=String(text).replace(/\s+/g,' ');e.classList.add('on');
+  clearTimeout(capT);capT=setTimeout(()=>e.classList.remove('on'),5500);
+};
+$('gcap').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();$('gcap').classList.remove('on')});
 
 g.Stage=Stage;
 })(window);

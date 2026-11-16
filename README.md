@@ -93,3 +93,9 @@ sw.js, precache.json  offline support
 ## Start over
 
 On the "Who do you want to be?" screen (🔄 button), **hold** the 🔁 Start over button for 2 seconds to clear stars, stickers, outfits and buildings.
+
+## If there is no sound or voice on a phone
+
+- Every spoken line now also appears as a **caption** on screen, so the game still has directions without sound.
+- Sound check for grown-ups: open Learn & Play and tap the **Learn & Play** title 5 times quickly. A panel shows what the audio and voice are doing, with test buttons (Say hello, Plain voice test, Beep).
+- Check the phone volume, that the silent switch is off, and (iPhone) Settings → Accessibility → Spoken Content has an English voice downloaded.
