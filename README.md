@@ -45,7 +45,7 @@ All spoken lines can be your own recordings. No recording yet? The phone's built
 1. `node tools/record-server.js`
 2. Open **http://localhost:8766/tools/recorder.html** in Chrome or Safari on the Mac and allow the microphone.
 3. Press **Space**, say the line, press **Space** again. It trims the silence, saves to `audio/`, and jumps to the next line.
-   Re-record any line any time. About 180 short lines in total; start with Numbers, Shapes and Prompts.
+   Re-record any line any time. The recorder opens on **Core lines first** (about 100 lines the games use most); switch to All lines for the rest (about 180). Start there.
 4. Commit and push the new `audio/` files (see below).
 
 Numbers are stitched together from your clips ("three hundred and forty five"), so you only record 0 to 20, the tens, and "hundred".
@@ -99,3 +99,5 @@ On the "Who do you want to be?" screen (🔄 button), **hold** the 🔁 Start ov
 - Every spoken line now also appears as a **caption** on screen, so the game still has directions without sound.
 - Sound check for grown-ups: open Learn & Play and tap the **Learn & Play** title 5 times quickly. A panel shows what the audio and voice are doing, with test buttons (Say hello, Plain voice test, Beep).
 - Check the phone volume, that the silent switch is off, and (iPhone) Settings → Accessibility → Spoken Content has an English voice downloaded.
+
+**Note:** the iPhone's built-in voice does not work inside the home-screen app on some phones. Recorded lines do not have that problem, which is why recording is the real fix.

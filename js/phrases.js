@@ -71,6 +71,9 @@
    .forEach(a=>add(a[0],a[1],'B Colouring'));
 
   const norm=t=>String(t).toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+  /* the ~100 lines the learning games use most: record these first */
+  const SKIP=new Set(['n0','n30','n40','n50','n60','n70','n80','n90','hundred','and','stars','you_have','you_caught','sides3','sides4','round','all_stickers','smart','clever','thank_you']);
+  g.CORE=new Set(P.filter(p=>/^[1-7] /.test(p.cat)&&!SKIP.has(p.id)).map(p=>p.id));
   g.PHRASES=P;
   g.PHRASE_BY_TEXT=Object.fromEntries(P.map(p=>[norm(p.text),p.id]));
   g.phraseNorm=norm;

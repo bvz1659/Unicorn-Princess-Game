@@ -38,7 +38,7 @@
 </style>
 </head>
 <body>
-<header><h1>🎙️ Magic Land voice recorder</h1><div class="bar"><i id="pbar"></i></div><div id="pcount"></div></header>
+<header><h1>🎙️ Magic Land voice recorder</h1><select id="mode"><option value="core">Core lines first (about 100)</option><option value="all">All lines</option></select><div class="bar"><i id="pbar"></i></div><div id="pcount"></div></header>
 <main>
   <div class="card">
     <div class="cat" id="cat"></div>
@@ -66,14 +66,14 @@
 <script>
 const $=id=>document.getElementById(id);
 let have=new Set(),cur=0,ac=null,stream=null,node=null,src=null,chunks=[],recording=false,playAudio=null;
-const P=PHRASES;
+let P=PHRASES;
 
 async function loadClips(){try{have=new Set(await (await fetch('/api/clips')).json())}catch(e){$('status').textContent='⚠️ Start the helper first: node tools/record-server.js'}}
 function render(){
   const p=P[cur];
   $('cat').textContent=p.cat.replace(/^[0-9A-Z] /,'');$('say').textContent=p.text;
   $('play').disabled=!have.has(p.id);
-  $('pbar').style.width=(have.size/P.length*100)+'%';$('pcount').textContent=have.size+' / '+P.length;
+  const done=P.filter(q=>have.has(q.id)).length;$('pbar').style.width=(done/P.length*100)+'%';$('pcount').textContent=done+' / '+P.length;
   const L=$('lists');L.innerHTML='';
   let last='';let grid;
   P.forEach((q,i)=>{
@@ -133,7 +133,9 @@ $('play').onclick=()=>playClip(P[cur].id);
 $('prev').onclick=()=>{if(cur>0){cur--;render()}};
 $('next').onclick=()=>{if(cur<P.length-1){cur++;render()}};
 addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();$('rec').click()}else if(e.code==='ArrowRight')$('next').click();else if(e.code==='ArrowLeft')$('prev').click()});
-loadClips().then(()=>{const i=P.findIndex(p=>!have.has(p.id));cur=i<0?0:i;render()});
+function setMode(m){try{localStorage.setItem('recmode',m)}catch(e){}P=m==='all'?PHRASES:PHRASES.filter(p=>CORE.has(p.id));const i=P.findIndex(p=>!have.has(p.id));cur=i<0?0:i;render()}
+$('mode').onchange=e=>setMode(e.target.value);
+loadClips().then(()=>{let m='core';try{m=localStorage.getItem('recmode')||'core'}catch(e){}$('mode').value=m;setMode(m)});
 </script>
 </body>
 </html>
