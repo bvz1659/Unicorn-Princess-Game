@@ -24,7 +24,9 @@ function open(){
   const row=el('div',null,d,'display:flex;gap:8px;flex-wrap:wrap');
   const btn=(t,fn)=>{const b=el('button',t,row,'font:700 14px system-ui;padding:10px 14px;border-radius:12px;border:0;background:#fff;color:#4a2a80');b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ML.unlock();fn()})};
   btn('Say hello',()=>ML.say('Hello! Can you hear me?'));
-  btn('Plain voice test',()=>{try{const u=new SpeechSynthesisUtterance('This is the plain phone voice.');u.onstart=()=>ML.dbg('plain: started');u.onerror=e=>ML.dbg('plain: error '+e.error);u.onend=()=>ML.dbg('plain: finished');g.speechSynthesis.cancel();g.speechSynthesis.speak(u);ML.dbg('plain: queued')}catch(e){ML.dbg('plain threw '+e.message)}});
+  const plain=(duck)=>{try{const u=new SpeechSynthesisUtterance('This is the plain phone voice.');u.onstart=()=>ML.dbg('plain: started');u.onerror=e=>ML.dbg('plain: error '+e.error);u.onend=()=>{ML.dbg('plain: finished');ML.ttsRestore()};g.__u2=u;if(duck)ML.ttsDuck();g.speechSynthesis.cancel();setTimeout(()=>{g.speechSynthesis.speak(u);ML.dbg('plain'+(duck?' (audio released)':'')+': queued')},150)}catch(e){ML.dbg('plain threw '+e.message)}};
+  btn('Plain voice test',()=>plain(false));
+  btn('Voice test, audio released',()=>plain(true));
   btn('Beep',()=>{ML.tone(660,ML.now(),.4,'sine',.3);ML.dbg('beep')});
   btn('Close',close);
   box={d,pre};refresh();timer=setInterval(refresh,600);

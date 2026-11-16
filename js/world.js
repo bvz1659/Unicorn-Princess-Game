@@ -161,6 +161,9 @@ function speechUnlock(){   // phones only allow speech once it has been started 
   if(speechOK||!('speechSynthesis' in window))return;speechOK=true;
   try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}
 }
+// iPhones will not start speech while our silent-audio trick holds the audio session, so let go of it while the voice talks
+function ttsDuck(){try{if(navigator.audioSession)navigator.audioSession.type='auto'}catch(e){}if(silentEl){try{silentEl.pause()}catch(e){}}}
+function ttsRestore(){clearTimeout(window.__rt);try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}if(silentEl){try{silentEl.play().catch(()=>{})}catch(e){}}}
 const DBG=[];
 function dbg(m){DBG.push(new Date().toTimeString().slice(3,8)+' '+m);if(DBG.length>14)DBG.shift()}
 function say(txt){
@@ -176,9 +179,9 @@ function say(txt){
     const u=new SpeechSynthesisUtterance(txt);
     u.pitch=1.5;u.rate=.95;u.volume=1;
     if(voice){u.voice=voice;u.lang=voice.lang}          // only set a language when we really have a matching voice
-    u.onerror=e=>dbg(' tts error: '+(e.error||'?'));u.onstart=()=>dbg(' tts started');
+    u.onerror=e=>{dbg(' tts error: '+(e.error||'?'));if(e.error!=='interrupted'&&e.error!=='canceled')ttsRestore()};u.onstart=()=>dbg(' tts started');u.onend=()=>{dbg(' tts finished');ttsRestore()};
     window.__utt=u;                                     // keep a reference so it is not garbage collected mid-sentence
-    const go=()=>{try{ss.resume();ss.speak(u)}catch(e){dbg(' speak threw '+e.message)}};
+    const go=()=>{try{ttsDuck();ss.resume();ss.speak(u);clearTimeout(window.__rt);window.__rt=setTimeout(ttsRestore,3500+txt.length*110)}catch(e){dbg(' speak threw '+e.message)}};
     if(ss.speaking||ss.pending){ss.cancel();setTimeout(go,120)}else go();
   }catch(e){dbg(' say threw '+e.message)}
 }
@@ -1346,7 +1349,7 @@ cam.x=clamp(P.x-W/Z/2,0,WW);cam.y=clamp(P.y-H/Z*.55,0,WH);
 requestAnimationFrame(frame);
 
 // bridge for the learning games (js/engine.js, js/hub.js, js/games/*)
-window.ML={dbgLog:()=>DBG,dbg,setSound,S,P,audio:()=>AC?{ac:AC,out:master}:null,say,sfx,tone,nf,now,toast,unlock,save,hud,burst,hearts,confetti,questEvent,pick,shuffle,
+window.ML={ttsDuck,ttsRestore,dbgLog:()=>DBG,dbg,setSound,S,P,audio:()=>AC?{ac:AC,out:master}:null,say,sfx,tone,nf,now,toast,unlock,save,hud,burst,hearts,confetti,questEvent,pick,shuffle,
   addStarsQuiet:n=>{S.stars+=n;hud();save()}};
 // debug hook for testing
 window.__game={S,P,animals,flowers,choose,Q,WX,questEvent,openLearn,startRace,startSeek,startShower,enterCave,enterBuild,openPet,pads,DOORS,CAVE,SCHOOL,DF};
