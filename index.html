@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Magic Land">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#8fe388">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Magic Land</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud" hidden>
+  <div id="score"><span id="stars">⭐ 0</span><span id="pals">🐾 0</span></div>
+  <div id="tools">
+    <button class="rb" id="dressBtn" aria-label="Dress up">👗</button>
+    <button class="rb" id="menuBtn" aria-label="Toy box">🎒</button>
+    <button class="rb" id="snd" aria-label="Sound">🔊</button>
+    <button class="rb" id="swap" aria-label="Change character">🔄</button>
+  </div>
+  <div id="quest"><span id="qi">🌸</span><span id="qd"></span></div>
+  <button id="learnBtn" aria-label="Learn and play"><span>🎮</span></button>
+  <button id="magic" aria-label="Magic"><span id="magicIcon">🌈</span></button>
+</div>
+<div id="paintPill" hidden>🎨 ✖</div>
+<div id="gbar" hidden><button id="gstop" aria-label="Stop">✖</button><span id="ginfo"></span></div>
+<div id="bignum"></div>
+<div id="build" hidden></div>
+<div id="menu" class="sheet" hidden><div class="mcard"><button id="menuX">✖</button><div class="grid">
+  <button data-m="paint" id="mPaint">🎨</button><button data-m="build">🏡</button><button data-m="shower">🌠</button>
+  <button data-m="seek">🙈</button><button data-m="race">🏁</button><button data-m="learn">📚</button>
+  <button data-m="pets">🐾</button><button data-m="night" id="mNight">🌙</button><button data-m="clean">🧽</button>
+</div></div></div>
+<div id="modal" class="sheet" hidden><div class="mcard"><div id="mbox"></div></div></div>
+<div id="toast"></div>
+<div id="dress" hidden><div id="dtabs"></div><div id="ditems"></div></div>
+
+<div id="pick">
+  <span class="twinkle" style="left:8%;top:10%">✨</span><span class="twinkle" style="right:10%;top:16%;animation-delay:-1s">⭐</span>
+  <span class="twinkle" style="left:14%;bottom:12%;animation-delay:-.5s">💖</span><span class="twinkle" style="right:12%;bottom:10%;animation-delay:-1.7s">✨</span>
+  <h1>Who do you want<br>to be?</h1>
+  <div id="cards">
+    <button class="card" data-c="unicorn"><canvas class="big" id="pu" width="440" height="440"></canvas><span class="nm">Unicorn</span></button>
+    <button class="card" data-c="princess"><canvas class="big" id="pp" width="440" height="440"></canvas><span class="nm">Princess</span></button>
+  </div>
+  <button id="reset"><i></i><span>🔁 Start over (hold)</span></button>
+</div>
+
+<canvas id="gcv" hidden></canvas>
+<div id="gtop" hidden>
+  <button id="gexit" aria-label="Back">✖</button>
+  <div id="gmid"><span id="gtitle"></span><span id="gdots"></span></div>
+  <button id="gsay" aria-label="Say it again">🔊</button>
+</div>
+<div id="gwin" hidden><div class="wbox">
+  <div class="wstars"></div><div class="wnew">New sticker!</div><div class="wsticker"></div>
+  <div class="wbtns"><button id="gagain">▶</button><button id="ghome">🏠</button></div>
+</div></div>
+<div id="hub" hidden>
+  <div class="hubbar"><button id="hubX" aria-label="Close">✖</button><div class="hubtitle">Learn &amp; Play</div><div id="hubStars">⭐ 0</div></div>
+  <div id="hubBody"></div>
+</div>
+
+<script src="js/phrases.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/world.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/hub.js"></script>
+<script src="js/games/shapes.js"></script>
+<script src="js/games/numbers.js"></script>
+<script src="js/games/clinic.js"></script>
+<script>Voice.init();</script>
+</body>
+</html>

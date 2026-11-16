@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Magic Land voice recorder</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f6eeff;color:#3b2a63}
+  header{position:sticky;top:0;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.1);padding:12px 18px;z-index:5;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0}
+  .bar{flex:1;min-width:160px;height:12px;background:#eadcff;border-radius:6px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#ff6fb5,#a96bff);width:0}
+  main{max-width:860px;margin:0 auto;padding:18px}
+  .card{background:#fff;border-radius:22px;padding:26px;text-align:center;box-shadow:0 6px 20px rgba(120,60,170,.15);margin-bottom:22px}
+  .cat{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#a96bff;font-weight:700}
+  .say{font-size:44px;font-weight:800;margin:14px 0 6px;line-height:1.15}
+  .tip{color:#7b6aa3;font-size:15px;margin-bottom:18px}
+  .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  button{font:inherit;border:0;border-radius:14px;padding:12px 20px;font-weight:700;cursor:pointer;background:#eadcff;color:#3b2a63}
+  button.rec{background:#ff4d6d;color:#fff;font-size:20px;padding:16px 34px}
+  button.rec.on{animation:pulse 1s infinite}
+  button.good{background:#5ee06a}
+  button:disabled{opacity:.4;cursor:default}
+  @keyframes pulse{50%{transform:scale(1.06);box-shadow:0 0 0 10px rgba(255,77,109,.25)}}
+  .meter{height:10px;background:#eadcff;border-radius:5px;margin:16px auto 0;max-width:340px;overflow:hidden}
+  .meter i{display:block;height:100%;width:0;background:#5ee06a;transition:width .05s}
+  .status{min-height:22px;margin-top:12px;font-weight:600}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:#7b6aa3;margin:22px 4px 8px}
+  .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+  .it{background:#fff;border-radius:12px;padding:9px 12px;font-size:14px;cursor:pointer;display:flex;gap:8px;align-items:center;border:2px solid transparent}
+  .it.cur{border-color:#ff6fb5}
+  .it .ck{width:18px;flex:none;text-align:center}
+  .it.done .ck::before{content:'✅'}
+  .it:not(.done) .ck::before{content:'○';color:#c9b6ee}
+  kbd{background:#eadcff;border-radius:6px;padding:2px 7px;font-size:13px}
+  .help{font-size:14px;color:#6b5a93;line-height:1.5}
+</style>
+</head>
+<body>
+<header><h1>🎙️ Magic Land voice recorder</h1><div class="bar"><i id="pbar"></i></div><div id="pcount"></div></header>
+<main>
+  <div class="card">
+    <div class="cat" id="cat"></div>
+    <div class="say" id="say">Loading…</div>
+    <div class="tip">Say it warmly and clearly, like you are talking to her. Keep each one short.</div>
+    <div class="row">
+      <button id="prev">◀ Back</button>
+      <button id="rec" class="rec">● Record <small>(space)</small></button>
+      <button id="play" disabled>▶ Play</button>
+      <button id="next">Next ▶</button>
+    </div>
+    <div class="meter"><i id="meter"></i></div>
+    <div class="status" id="status"></div>
+  </div>
+  <div class="card help" style="text-align:left">
+    <b>How it works</b><br>
+    Press <kbd>Space</kbd> (or the red button) to start, say the line, press <kbd>Space</kbd> again to stop.
+    It saves instantly into the game's <code>audio</code> folder and jumps to the next line. Re-record any line any time.
+    You do not have to do them all: any line without a recording uses the phone's own voice.
+    Start with <b>Numbers</b>, <b>Shapes</b> and <b>Prompts</b>, the most-used lines.
+  </div>
+  <div id="lists"></div>
+</main>
+<script src="../js/phrases.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let have=new Set(),cur=0,ac=null,stream=null,node=null,src=null,chunks=[],recording=false,playAudio=null;
+const P=PHRASES;
+
+async function loadClips(){try{have=new Set(await (await fetch('/api/clips')).json())}catch(e){$('status').textContent='⚠️ Start the helper first: node tools/record-server.js'}}
+function render(){
+  const p=P[cur];
+  $('cat').textContent=p.cat.replace(/^[0-9A-Z] /,'');$('say').textContent=p.text;
+  $('play').disabled=!have.has(p.id);
+  $('pbar').style.width=(have.size/P.length*100)+'%';$('pcount').textContent=have.size+' / '+P.length;
+  const L=$('lists');L.innerHTML='';
+  let last='';let grid;
+  P.forEach((q,i)=>{
+    if(q.cat!==last){last=q.cat;const h=document.createElement('h2');h.textContent=q.cat.replace(/^[0-9A-Z] /,'');L.appendChild(h);grid=document.createElement('div');grid.className='list';L.appendChild(grid)}
+    const d=document.createElement('div');d.className='it'+(i===cur?' cur':'')+(have.has(q.id)?' done':'');
+    d.innerHTML='<span class="ck"></span><span></span>';d.lastChild.textContent=q.text;d.onclick=()=>{cur=i;render();window.scrollTo({top:0,behavior:'smooth'})};
+    grid.appendChild(d);
+  });
+}
+async function startRec(){
+  try{
+    if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state!=='running')await ac.resume();
+    if(!stream)stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:false}});
+  }catch(e){$('status').textContent='⚠️ Microphone blocked. Allow it in the browser address bar, then try again.';return}
+  chunks=[];src=ac.createMediaStreamSource(stream);node=ac.createScriptProcessor(4096,1,1);
+  node.onaudioprocess=e=>{
+    const d=e.inputBuffer.getChannelData(0);chunks.push(new Float32Array(d));
+    let m=0;for(let i=0;i<d.length;i++)m=Math.max(m,Math.abs(d[i]));$('meter').style.width=Math.min(100,m*140)+'%';
+  };
+  src.connect(node);node.connect(ac.destination);   // destination keeps the processor running; output is silent
+  recording=true;$('rec').classList.add('on');$('rec').innerHTML='■ Stop <small>(space)</small>';$('status').textContent='Recording… say it now';
+}
+function encodeWav(f32,rate){
+  const buf=new ArrayBuffer(44+f32.length*2),v=new DataView(buf),w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+f32.length*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,rate,true);v.setUint32(28,rate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,f32.length*2,true);
+  for(let i=0;i<f32.length;i++){const s=Math.max(-1,Math.min(1,f32[i]));v.setInt16(44+i*2,s<0?s*0x8000:s*0x7fff,true)}
+  return buf;
+}
+async function stopRec(){
+  recording=false;$('rec').classList.remove('on');$('rec').innerHTML='● Record <small>(space)</small>';$('meter').style.width='0';
+  try{src.disconnect();node.disconnect()}catch(e){}
+  let n=0;chunks.forEach(c=>n+=c.length);const all=new Float32Array(n);let o=0;chunks.forEach(c=>{all.set(c,o);o+=c.length});
+  // trim silence at both ends, keep a little breathing room, normalise
+  const thr=.02,pad=Math.round(ac.sampleRate*.08);let a=0,b=all.length-1;
+  while(a<b&&Math.abs(all[a])<thr)a++;while(b>a&&Math.abs(all[b])<thr)b--;
+  a=Math.max(0,a-pad);b=Math.min(all.length-1,b+pad*2);
+  if(b-a<ac.sampleRate*.15){$('status').textContent='That was too quiet or too short. Try again.';return}
+  const seg=all.slice(a,b+1);let pk=0;for(let i=0;i<seg.length;i++)pk=Math.max(pk,Math.abs(seg[i]));
+  const gain=pk>0?.9/pk:1;for(let i=0;i<seg.length;i++)seg[i]*=gain;
+  // short fade in/out so there are no clicks
+  const fd=Math.round(ac.sampleRate*.01);for(let i=0;i<fd;i++){seg[i]*=i/fd;seg[seg.length-1-i]*=i/fd}
+  const p=P[cur];$('status').textContent='Saving…';
+  try{
+    const r=await fetch('/api/save?id='+p.id,{method:'POST',body:encodeWav(seg,ac.sampleRate)});
+    if(!r.ok)throw new Error(await r.text());
+    have.add(p.id);$('status').textContent='✅ Saved "'+p.text+'"';
+    await playClip(p.id);
+    if(cur<P.length-1)cur++;
+    render();
+  }catch(e){$('status').textContent='⚠️ '+e.message}
+}
+function playClip(id){return new Promise(res=>{if(playAudio)playAudio.pause();playAudio=new Audio('/audio/'+id+'.m4a?'+Date.now());playAudio.onended=res;playAudio.onerror=res;playAudio.play().catch(res)})}
+$('rec').onclick=()=>recording?stopRec():startRec();
+$('play').onclick=()=>playClip(P[cur].id);
+$('prev').onclick=()=>{if(cur>0){cur--;render()}};
+$('next').onclick=()=>{if(cur<P.length-1){cur++;render()}};
+addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();$('rec').click()}else if(e.code==='ArrowRight')$('next').click();else if(e.code==='ArrowLeft')$('prev').click()});
+loadClips().then(()=>{const i=P.findIndex(p=>!have.has(p.id));cur=i<0?0:i;render()});
+</script>
+</body>
+</html>
