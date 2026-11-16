@@ -251,7 +251,12 @@ document.querySelectorAll('.card').forEach(b=>b.addEventListener('pointerdown',e
 $('dressBtn').addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();unlock();enterDress()});
 $('stars').addEventListener('pointerdown',e=>{e.stopPropagation();unlock();say('You have '+S.stars+' stars!');sfx.collect();toast('⭐ '+S.stars,1500)});
 $('swap').addEventListener('pointerdown',e=>{e.stopPropagation();held=false;$('pick').hidden=false;$('hud').hidden=true;S.char=null;sfx.pop()});
-$('snd').addEventListener('pointerdown',e=>{e.stopPropagation();S.sound=!S.sound;$('snd').textContent=S.sound?'🔊':'🔇';if(!S.sound){try{speechSynthesis.cancel()}catch(_){}if(window.Voice)Voice.stop()}else{audioInit();sfx.pop()}});
+function setSound(on){
+  S.sound=on;
+  document.querySelectorAll('.sndbtn').forEach(b=>{b.textContent=on?'🔊':'🔇'});
+  if(!on){try{speechSynthesis.cancel()}catch(_){}if(window.Voice)Voice.stop()}else{audioInit();sfx.pop()}
+}
+document.querySelectorAll('.sndbtn').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();setSound(!S.sound)}));
 $('magic').addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();unlock();magic()});
 
 function magic(){
@@ -1332,7 +1337,7 @@ cam.x=clamp(P.x-W/Z/2,0,WW);cam.y=clamp(P.y-H/Z*.55,0,WH);
 requestAnimationFrame(frame);
 
 // bridge for the learning games (js/engine.js, js/hub.js, js/games/*)
-window.ML={S,P,audio:()=>AC?{ac:AC,out:master}:null,say,sfx,tone,nf,now,toast,unlock,save,hud,burst,hearts,confetti,questEvent,pick,shuffle,
+window.ML={setSound,S,P,audio:()=>AC?{ac:AC,out:master}:null,say,sfx,tone,nf,now,toast,unlock,save,hud,burst,hearts,confetti,questEvent,pick,shuffle,
   addStarsQuiet:n=>{S.stars+=n;hud();save()}};
 // debug hook for testing
 window.__game={S,P,animals,flowers,choose,Q,WX,questEvent,openLearn,startRace,startSeek,startShower,enterCave,enterBuild,openPet,pads,DOORS,CAVE,SCHOOL,DF};
