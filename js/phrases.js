@@ -65,6 +65,11 @@
    ['Dance on three sparkly pads!'],['Find a magic door!'],['Find the treasure cave!'],['Go dress up in the castle!'],['Take care of a friend!'],['Play a game!'],['Build two things in your garden!'],
    ['Go and play a learning game!'],['Paint with your magic!']].forEach((a,i)=>add('quest'+i,a[0],'A Quests'));
 
+  /* ---- colouring ---- */
+  [['draw_time','Draw anything you like!'],['colour_time','Pick a colour and tap to fill!'],['photo_time','Choose a photo to colour in!'],['saved_pic','I saved your picture!'],
+   ['cat_dino','Dinosaurs!'],['cat_animals','Animals!'],['cat_mermaid','Mermaids!'],['cat_magic','Unicorns!'],['cat_ocean','Ocean!'],['cat_space','Space!'],['cat_vehicles','Vehicles!'],['cat_garden','Garden!']]
+   .forEach(a=>add(a[0],a[1],'B Colouring'));
+
   const norm=t=>String(t).toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
   g.PHRASES=P;
   g.PHRASE_BY_TEXT=Object.fromEntries(P.map(p=>[norm(p.text),p.id]));

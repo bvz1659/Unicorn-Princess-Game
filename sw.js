@@ -1,6 +1,6 @@
 // Offline service worker. precache.json (made by `node tools/build.js`) lists every file;
 // after one online visit the whole game, including your voice clips, works in airplane mode.
-const VERSION = '3badced0e0';
+const VERSION = 'f2db4f751d';
 const CACHE = 'magic-land-' + VERSION;
 
 self.addEventListener('install', e => {

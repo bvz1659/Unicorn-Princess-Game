@@ -25,6 +25,14 @@ node tools/record-server.js        # also serves the game
 | ✏️ **Trace It**: trace shapes and the numbers 0 to 9 | 🎈 **Balloon Pop**: pop the number, or pop 1 to 10 in order | |
 | 🃏 **Memory Match**: shapes, then numerals matched to dots | ➕ **Add It Up**: adding and taking away with pictures | |
 
+### 🎨 Colouring (in the same menu)
+
+- **Free Draw**: marker, crayon, rainbow and sparkle brushes, eraser, paint bucket, 3 sizes, undo.
+- **Colouring Pages**: pick a category (🦖 dinosaurs, 🐱 animals, 🧜‍♀️ mermaids, 🦄 unicorns, 🐠 ocean, 🚀 space, 🚗 vehicles, 🌸 garden) and a picture. Every picture is drawn by the game, so the 🎲 button makes a new variation each time. Tap a shape to fill it, or paint with the brushes.
+- **My Photo**: choose or take a photo and the game turns it into a black and white colouring page (🔍 changes how detailed it is). The photo never leaves the phone.
+- **Colour wheel** (the 🎨 swatch): drag on the wheel to mix any colour, slide for lighter or darker. Your mixed colours are remembered.
+- 💾 saves or shares the finished picture (the share sheet on iPhone, a download elsewhere).
+
 Each game has 3 to 4 levels and moves up automatically as she wins. There are no wrong-answer penalties: a gentle "try again".
 
 Magic Land itself (the meadow) has a quest bar, dress-up room, build mode, pets, paint, dance floor, magic doors,
@@ -73,6 +81,8 @@ js/world.js           Magic Land (the meadow) and shared audio/sound effects
 js/engine.js          mini game engine: stage, drawing kit, drag and drop, tweens
 js/hub.js             Learn & Play menu and sticker book
 js/games/*.js         shapes.js, numbers.js, clinic.js
+js/art-lib.js         the colouring page pictures (drawn in code)
+js/colour.js          free draw, colouring, photo converter, colour wheel
 js/phrases.js         every spoken line (used by the game and the recorder)
 js/voice.js           plays your recordings, falls back to the phone voice
 audio/                your recorded lines (.m4a) and manifest.json

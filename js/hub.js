@@ -7,7 +7,13 @@ const Hub={};
 const SECTIONS=[
   {cat:'shapes',icon:'🔷',title:'Shapes'},
   {cat:'numbers',icon:'🔢',title:'Numbers'},
+  {cat:'colour',icon:'🎨',title:'Colouring'},
   {cat:'more',icon:'🩺',title:'More fun'}
+];
+Hub.extras=[
+  {icon:'🖌️',name:'Free Draw',color:['#ffb36b','#ff6f91'],go:()=>Art.open('draw')},
+  {icon:'🖍️',name:'Colouring Pages',color:['#a0e7a0','#3fc48a'],go:()=>Art.open('page')},
+  {icon:'📷',name:'My Photo',color:['#8fd3ff','#6a8dff'],go:()=>Art.open('photo')}
 ];
 function el(tag,cls,txt,parent){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;if(parent)parent.appendChild(e);return e}
 function tap(b,fn){b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ML.unlock();fn(e)})}
@@ -35,9 +41,13 @@ function render(){
   tap(book,()=>{ML.sfx.pop();renderBook()});
   for(const sec of SECTIONS){
     const ids=Stage.order.filter(id=>Stage.reg[id].cat===sec.cat);
-    if(!ids.length)continue;
+    if(!ids.length&&sec.cat!=='colour')continue;
     el('div','hsec',sec.icon+'  '+sec.title,body);
     const grid=el('div','hgrid',null,body);
+    if(sec.cat==='colour'){
+      for(const x of Hub.extras){const b=el('button','tile',null,grid);b.style.background='linear-gradient(145deg,'+x.color[0]+','+x.color[1]+')';el('span','ticon',x.icon,b);el('span','tname',x.name,b);tap(b,()=>{ML.sfx.pop();x.go()})}
+      continue;
+    }
     for(const id of ids){
       const d=Stage.reg[id],lv=Stage.lvOf(id);
       const b=el('button','tile',null,grid);
