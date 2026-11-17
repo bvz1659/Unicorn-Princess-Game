@@ -43,7 +43,7 @@
   <div class="card">
     <div class="cat" id="cat"></div>
     <div class="say" id="say">Loading…</div>
-    <div class="tip">Say it warmly and clearly, like you are talking to her. Keep each one short.</div>
+    <div class="tip">Say it warmly and clearly, like you are talking to her. Keep each one short. For the happy sounds, do them big and playful, as if she just did something wonderful.</div>
     <div class="row">
       <button id="prev">◀ Back</button>
       <button id="rec" class="rec">● Record <small>(space)</small></button>
@@ -144,7 +144,7 @@ addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();$('rec').
 let REDO=[];
 function setMode(m){try{localStorage.setItem('recmode',m)}catch(e){}P=m==='all'?PHRASES:m==='redo'?PHRASES.filter(p=>REDO.includes(p.id)):PHRASES.filter(p=>CORE.has(p.id));const i=m==='redo'?0:P.findIndex(p=>!have.has(p.id));cur=i<0?0:i;render()}
 $('mode').onchange=e=>setMode(e.target.value);
-loadClips().then(async()=>{try{REDO=await (await fetch('/tools/redo.json')).json()}catch(e){}let m='core';try{m=localStorage.getItem('recmode')||'core'}catch(e){}$('mode').value=m;setMode(m)});
+loadClips().then(async()=>{try{REDO=await (await fetch('/tools/redo.json')).json()}catch(e){}let m='core';try{m=localStorage.getItem('recmode')||'core'}catch(e){}const qm=new URLSearchParams(location.search).get('mode');if(qm)m=qm;$('mode').value=m;setMode(m)});
 </script>
 </body>
 </html>

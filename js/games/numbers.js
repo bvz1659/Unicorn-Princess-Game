@@ -108,7 +108,7 @@ create(A){
   function layout(){plate.x=A.W/2;plate.y=A.H*.55;plate.rx=Math.min(110,A.W*.28)}
   function eatIt(){
     lock=true;items.filter(i=>i.locked).forEach((it,k)=>A.later(k*90,()=>{A.tween(it,{x:A.W/2,y:A.H*.27,s:.2},380);A.sfx.pop()}));
-    A.later(need*90+500,()=>{eat=1;A.good();A.say('yum');A.burst(A.W/2,A.H*.27,18);round++;A.progress(round,rounds);
+    A.later(need*90+500,()=>{eat=1;A.good();A.say('yum');A.react('yum',{chance:.7,delay:500});A.burst(A.W/2,A.H*.27,18);round++;A.progress(round,rounds);
       if(round>=rounds)A.later(1100,()=>A.win({stars:3}));else A.later(1400,newRound)});
   }
   return{

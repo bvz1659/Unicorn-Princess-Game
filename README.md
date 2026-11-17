@@ -101,3 +101,7 @@ On the "Who do you want to be?" screen (🔄 button), **hold** the 🔁 Start ov
 - Check the phone volume, that the silent switch is off, and (iPhone) Settings → Accessibility → Spoken Content has an English voice downloaded.
 
 **Note:** the iPhone's built-in voice does not work inside the home-screen app on some phones. Recorded lines do not have that problem, which is why recording is the real fix.
+
+
+## Happy sounds
+The `C Sounds` lines (giggles, cheers, gasps, aww, mmm, uh-oh) are not spoken words. The game plays them as little reactions after wins, wrong answers, feeding, cuddling friends and catching stars. A higher-pitched copy is used as the pets' voice. Record them with `node tools/record-server.js`, then open `http://localhost:8766/tools/recorder.html?mode=redo`.

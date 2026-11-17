@@ -70,6 +70,12 @@
    ['cat_dino','Dinosaurs!'],['cat_animals','Animals!'],['cat_mermaid','Mermaids!'],['cat_magic','Unicorns!'],['cat_ocean','Ocean!'],['cat_space','Space!'],['cat_vehicles','Vehicles!'],['cat_garden','Garden!']]
    .forEach(a=>add(a[0],a[1],'B Colouring'));
 
+  /* ---- happy sounds (not words: giggles, gasps, cheers). The game plays these as little reactions ---- */
+  [['giggle1','Giggle: a happy little laugh (hee hee!)'],['giggle2','Giggle: a bigger laugh (ha ha ha!)'],['giggle3','Giggle: a tiny cheeky one (hehe!)'],
+   ['yay1','Yay! (excited)'],['yay2','Yippee! (excited)'],['cheer','Woo-hoo! (big celebration)'],['gasp','Ooh! (a happy, surprised gasp)'],
+   ['sparkle','Ooooh (long and amazed, like seeing something sparkly)'],['uhoh','Uh-oh! (gentle and silly, not scary)'],['mmm','Mmm, yummy! (a happy tummy-rub sound)'],['aww','Aww (soft and cuddly)']]
+   .forEach(a=>add(a[0],a[1],'C Sounds'));
+
   const norm=t=>String(t).toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
   /* the ~100 lines the learning games use most: record these first */
   const SKIP=new Set(['n0','n30','n40','n50','n60','n70','n80','n90','hundred','and','stars','you_have','you_caught','sides3','sides4','round','all_stickers','smart','clever','thank_you']);

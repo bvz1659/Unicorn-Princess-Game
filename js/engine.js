@@ -159,13 +159,14 @@ function dots(done,total){
   const d=$('gdots');d.innerHTML='';
   for(let i=0;i<total;i++){const s=document.createElement('span');s.textContent=i<done?'⭐':'☆';d.appendChild(s)}
 }
-function good(){streak++;const f=ML.nf(streak%8+4);ML.tone(f,ML.now(),.5,'sine',.18);ML.tone(f*2,ML.now()+.03,.3,'triangle',.07)}
-function oops(){streak=0;ML.sfx.boing()}
+function react(grp,o){try{return g.Voice&&g.Voice.react(grp,o)}catch(e){return false}}
+function good(){react('happy',{chance:.2,delay:800});streak++;const f=ML.nf(streak%8+4);ML.tone(f,ML.now(),.5,'sine',.18);ML.tone(f*2,ML.now()+.03,.3,'triangle',.07)}
+function oops(){streak=0;ML.sfx.boing();react('oops',{chance:.4,delay:500})}
 
 const api={
   get W(){return W},get H(){return H},get ctx(){return ctx},get t(){return t},get level(){return Stage.level},
   rnd,pick,shuffle,clamp,TAU,RB,tween,later,easeOut,easeBack,easeIO,burst,confetti:()=>confetti(W),emojiPop,sp,
-  say,numWords,good,oops,sfx:ML.sfx,
+  say,numWords,good,oops,react,sfx:ML.sfx,
   progress:dots,
   setPrompt:f=>{promptFn=f},
   drag:Drag,
@@ -184,7 +185,7 @@ function win(o){
   if(next>=0){S.stickers.push(def.id+'_'+next);sticker=def.stickers[next]}
   S.lv[def.id]=Math.min(def.levels-1,(S.lv[def.id]||0)+1);
   ML.save();ML.questEvent('game');if(def.cat!=='more')ML.questEvent('learn');
-  confetti(W,90);ML.sfx.fanfare();
+  confetti(W,90);ML.sfx.fanfare();react('cheer',{delay:700});
   say(sticker?'new_sticker':ML.pick(['great_job','well_done','super','wow']));
   const box=$('gwin');box.hidden=false;
   box.querySelector('.wstars').textContent='⭐'.repeat(stars);

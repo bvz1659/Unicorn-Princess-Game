@@ -1,7 +1,7 @@
 /* Plays your recorded lines (audio/<id>.m4a). Lines without a recording fall back to the phone's own voice.
    Works fully offline: the clips are cached by the service worker. */
 (function(g){
-  const V={have:new Set(),buf:{},loading:{},src:[],token:0,gain:null};
+  const V={have:new Set(),buf:{},loading:{},src:[],token:0,gain:null,busyUntil:0,lastReact:'',lastReactAt:0};
 
   function out(){const a=g.ML&&g.ML.audio&&g.ML.audio();return a||null}
 
@@ -54,7 +54,7 @@
   V.stop=function(){
     V.token++;
     for(const s of V.src){try{s.stop()}catch(e){}}
-    V.src=[];
+    V.src=[];V.busyUntil=0;
   };
 
   /* play a list of clip ids back to back; resolves when finished */
@@ -76,6 +76,29 @@
       t+=b.duration+(i<ids.length-1?.04:0);
       if(i===bufs.length-1&&done)s.onended=()=>{if(my===V.token)done()};
     });
+    V.busyUntil=t;
+    return true;
+  };
+
+  /* little reactions: giggles, cheers, gasps. Played after any spoken line finishes, never on top of it.
+     returns true if one was lined up. o={chance,delay(ms),rate} (rate>1 makes a higher "pet" voice) */
+  const GROUPS={happy:['giggle1','giggle2','giggle3','yay1','yay2'],cheer:['cheer','yay1','yay2'],oops:['uhoh'],yum:['mmm'],cuddle:['aww','giggle1'],wow:['gasp','sparkle'],laugh:['giggle1','giggle2','giggle3']};
+  V.react=function(group,o){
+    o=o||{};const S=g.ML&&g.ML.S;
+    if(!S||!S.sound||(o.chance!=null&&Math.random()>o.chance))return false;
+    const list=(GROUPS[group]||[]).filter(i=>V.have.has(i));if(!list.length)return false;
+    const nowMs=Date.now();if(nowMs-V.lastReactAt<2200)return false;   // never a pile-up of giggles
+    const pool=list.length>1?list.filter(i=>i!==V.lastReact):list,id=pool[Math.floor(Math.random()*pool.length)];
+    V.lastReact=id;V.lastReactAt=nowMs;
+    setTimeout(async()=>{
+      const a=out();if(!a)return;const b=await load(id);if(!b)return;
+      const start=Math.max(a.ac.currentTime+.02,V.busyUntil+.1);if(start-a.ac.currentTime>3)return;
+      if(!V.gain||V.gain.context!==a.ac){V.gain=a.ac.createGain();V.gain.gain.value=1.6;V.gain.connect(a.out||a.ac.destination)}
+      const rate=(o.rate||1)*(0.97+Math.random()*.06),dur=b.duration/rate,f=Math.min(.012,dur/4);
+      const s=a.ac.createBufferSource(),fg=a.ac.createGain();s.buffer=b;s.playbackRate.value=rate;
+      fg.gain.setValueAtTime(0,start);fg.gain.linearRampToValueAtTime(1,start+f);fg.gain.setValueAtTime(1,start+dur-f);fg.gain.linearRampToValueAtTime(0,start+dur);
+      s.connect(fg);fg.connect(V.gain);s.start(start);
+    },o.delay==null?350:o.delay);
     return true;
   };
 

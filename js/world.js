@@ -243,13 +243,14 @@ function tapAt(w){
   if(Math.hypot(w.x-C.x,w.y-(C.y+130))<75){enterDress();return}
   // tapping a friend/duck/butterfly/you makes them react
   const hit=(o,r,dy)=>Math.hypot(o.x-w.x,(o.y-(dy||0))-w.y)<r;
-  if(hit(P,70,45)){P.giggle=.6;P.hop=1;sfx.giggle();hearts(P.x,P.y-120,4);return}
+  if(hit(P,70,45)){P.giggle=.6;P.hop=1;if(!react('laugh',{delay:0}))sfx.giggle();hearts(P.x,P.y-120,4);return}
   for(const a of animals)if(hit(a,70,40)){if(a.follow){openPet(a);return}a.hop=1;hearts(a.x,a.y-80,2);animalSound(a);return}
   for(const d of ducks)if(hit(d,60,20)){d.hop=1;sfx.quack();sp(d.x,d.y-50,{type:'e',t:'💦',vy:-60,life:.8,max:.8,sz:30});return}
   for(const b of butter)if(!b.gone&&hit(b,70,b.z)){catchButterfly(b);return}
   if(hit(CAR,150,90)&&S.carCool<=0){carouselRide();return}
 }
-function animalSound(a){a.e==='🐱'?sfx.mew():a.e==='🐶'?sfx.blip():sfx.pop()}
+function react(grp,o){try{return !!(window.Voice&&Voice.react(grp,o))}catch(e){return false}}
+function animalSound(a){if(react('laugh',{chance:.6,delay:0,rate:1.3+Math.random()*.35}))return;a.e==='🐱'?sfx.mew():a.e==='🐶'?sfx.blip():sfx.pop()}
 
 /* ---------- buttons ---------- */
 function choose(c){
@@ -391,7 +392,7 @@ function update(dt){
     }
     for(const s of stars){
       if(s.gone){if(S.t-s.gone>40)s.gone=0;continue}
-      if(Math.hypot(s.x-P.x,s.y-P.y)<75){s.gone=S.t;S.combo+=2;S.comboT=1.6;sfx.collect();burst(s.x,s.y-40,16,['#ffe66d','#fff','#ffd1f0'],200);addStars(3);questEvent('star')}
+      if(Math.hypot(s.x-P.x,s.y-P.y)<75){s.gone=S.t;S.combo+=2;S.comboT=1.6;sfx.collect();burst(s.x,s.y-40,16,['#ffe66d','#fff','#ffd1f0'],200);addStars(3);questEvent('star');react('happy',{chance:.3,delay:100})}
     }
     for(const t of trees){
       t.shake=Math.max(0,t.shake-dt*2);t.cool=Math.max(0,t.cool-dt);
@@ -749,7 +750,7 @@ function buildDress(){
   cat.items.forEach((it,i)=>{
     const b=mkBtn('opt'+((cat.toggle?o[it.k]:o[cat.key]===i)?' on':''),it.e||'',()=>{
       if(cat.toggle)o[it.k]=!o[it.k];else o[cat.key]=i;
-      D.changed=true;save();S.combo=(S.combo+1)%8;sfx.collect();D.spin=S.char==='princess'?.9:0;D.hop=S.char==='unicorn'?1:0;
+      D.changed=true;save();S.combo=(S.combo+1)%8;sfx.collect();react('wow',{chance:.35,delay:0});D.spin=S.char==='princess'?.9:0;D.hop=S.char==='unicorn'?1:0;
       burst(D.cx,D.fy-D.h*D.sc*.6,16,['#fff','#ffd1f0','#ffe66d','#c9a8ff'],220);buildDress();
     });
     if(it.sw)b.style.background=it.sw;
@@ -988,7 +989,7 @@ function petRender(){
 }
 function petCare(icon,line){
   const a=PET;if(!a)return;
-  a.happy=Math.min(5,a.happy+1);sfx.collect();say(line);
+  a.happy=Math.min(5,a.happy+1);sfx.collect();say(line);react('cuddle',{delay:900,rate:1.25});
   const pb=$('pbig');pb.classList.remove('wig');void pb.offsetWidth;pb.classList.add('wig');
   for(let i=0;i<6;i++){const s=el('span','fx',icon,$('mbox'));s.style.left=(25+Math.random()*50)+'%';s.style.animationDelay=(i*.08)+'s';setTimeout(()=>s.remove(),1500)}
   document.querySelectorAll('.phearts span').forEach((h,i)=>{h.textContent=i<a.happy?'💖':'🤍'});
@@ -1060,7 +1061,7 @@ function seekTick(dt){
   if(d<700&&Math.random()<dt*6)sp(t.x+rnd(-70,70),t.y-rnd(40,200),{type:'e',t:'✨',vy:-30,life:1,max:1,sz:rnd(20,32)});
   if(d<110){
     sp(t.x,t.y-100,{type:'e',t:SK.pet,vy:-150,g:300,life:1.8,max:1.8,sz:90});
-    confetti(t.x,t.y,50);sfx.fanfare();addStars(8);toast('You found me! 🎉',2600);say('You found me! Hooray!');questEvent('game');
+    confetti(t.x,t.y,50);sfx.fanfare();addStars(8);toast('You found me! 🎉',2600);say('You found me! Hooray!');react('cheer',{delay:900});questEvent('game');
     t.shake=1;S.mode='';SK=null;
   }
 }
