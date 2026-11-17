@@ -108,3 +108,6 @@ The `C Sounds` lines (giggles, cheers, gasps, aww, mmm, uh-oh) are not spoken wo
 
 ## Sound polish
 All voice clips play through a small studio chain in `js/voice.js` (warmth/presence EQ, compressor, light room reverb, limiter) and are levelled to the same loudness on load. Each friend has its own silly pitch (from its name) and babbles with your giggles and cheers; tapping a friend or opening its card plays it. Counting plays a rising chime. The meadow music pauses while someone is talking.
+
+## The host and tile icons
+`js/host.js` draws a little unicorn host in the top bar of every game (breathes, blinks, talks while a voice line plays, hops on right answers, wobbles on tries, dances on a win; wears a doctor cap in Dr. Unicorn). It also draws the vector icons on the hub tiles. No image files, so it works offline.

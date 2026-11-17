@@ -11,10 +11,11 @@ const SECTIONS=[
   {cat:'more',icon:'🩺',title:'More fun'}
 ];
 Hub.extras=[
-  {icon:'🖌️',name:'Free Draw',color:['#ffb36b','#ff6f91'],go:()=>Art.open('draw')},
-  {icon:'🖍️',name:'Colouring Pages',color:['#a0e7a0','#3fc48a'],go:()=>Art.open('page')},
-  {icon:'📷',name:'My Photo',color:['#8fd3ff','#6a8dff'],go:()=>Art.open('photo')}
+  {icon:'🖌️',ic:'draw',name:'Free Draw',color:['#ffb36b','#ff6f91'],go:()=>Art.open('draw')},
+  {icon:'🖍️',ic:'page',name:'Colouring Pages',color:['#a0e7a0','#3fc48a'],go:()=>Art.open('page')},
+  {icon:'📷',ic:'photo',name:'My Photo',color:['#8fd3ff','#6a8dff'],go:()=>Art.open('photo')}
 ];
+const Icon=(n,s)=>g.Host&&g.Host.icon?g.Host.icon(n,s):null;
 function el(tag,cls,txt,parent){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;if(parent)parent.appendChild(e);return e}
 function tap(b,fn){
   let sx=0,sy=0,id=null,t0=0;
@@ -42,7 +43,7 @@ function render(){
   $('hubStars').textContent='⭐ '+S.stars;
   const all=Stage.stickerList(),have=(S.stickers||[]).length;
   const book=el('button','tile book',null,body);
-  el('span','ticon','📒',book);el('span','tname','My stickers',book);el('span','tlv',have+' / '+all.length,book);
+  (function(){const ic=Icon('book',44);if(ic)book.appendChild(ic);else el('span','ticon','📒',book)})();el('span','tname','My stickers',book);el('span','tlv',have+' / '+all.length,book);
   tap(book,()=>{ML.sfx.pop();renderBook()});
   for(const sec of SECTIONS){
     const ids=Stage.order.filter(id=>Stage.reg[id].cat===sec.cat);
@@ -50,14 +51,14 @@ function render(){
     el('div','hsec',sec.icon+'  '+sec.title,body);
     const grid=el('div','hgrid',null,body);
     if(sec.cat==='colour'){
-      for(const x of Hub.extras){const b=el('button','tile',null,grid);b.style.background='linear-gradient(145deg,'+x.color[0]+','+x.color[1]+')';el('span','ticon',x.icon,b);el('span','tname',x.name,b);tap(b,()=>{ML.sfx.pop();x.go()})}
+      for(const x of Hub.extras){const b=el('button','tile',null,grid);b.style.background='linear-gradient(145deg,'+x.color[0]+','+x.color[1]+')';{const ic=Icon(x.ic,56);if(ic)b.appendChild(ic);else el('span','ticon',x.icon,b)}el('span','tname',x.name,b);tap(b,()=>{ML.sfx.pop();x.go()})}
       continue;
     }
     for(const id of ids){
       const d=Stage.reg[id],lv=Stage.lvOf(id);
       const b=el('button','tile',null,grid);
       b.style.background='linear-gradient(145deg,'+d.color[0]+','+d.color[1]+')';
-      el('span','ticon',d.icon,b);el('span','tname',d.name,b);
+      {const ic=Icon(id,56);if(ic)b.appendChild(ic);else el('span','ticon',d.icon,b)}el('span','tname',d.name,b);
       el('span','tlv','●'.repeat(lv+1)+'○'.repeat(Math.max(0,d.levels-lv-1)),b);
       tap(b,()=>{ML.sfx.pop();Stage.open(id)});
     }

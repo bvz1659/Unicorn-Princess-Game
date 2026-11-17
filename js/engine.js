@@ -160,9 +160,9 @@ function dots(done,total){
   for(let i=0;i<total;i++){const s=document.createElement('span');s.textContent=i<done?'⭐':'☆';d.appendChild(s)}
 }
 function react(grp,o){try{return g.Voice&&g.Voice.react(grp,o)}catch(e){return false}}
-function good(){react('happy',{chance:.2,delay:800});streak++;const f=ML.nf(streak%8+4);ML.tone(f,ML.now(),.5,'sine',.18);ML.tone(f*2,ML.now()+.03,.3,'triangle',.07)}
+function good(){if(g.Host)g.Host.cheer();react('happy',{chance:.2,delay:800});streak++;const f=ML.nf(streak%8+4);ML.tone(f,ML.now(),.5,'sine',.18);ML.tone(f*2,ML.now()+.03,.3,'triangle',.07)}
 function chime(k){const f=ML.nf(Math.min(14,Math.max(0,k))+2);ML.tone(f,ML.now(),.5,'triangle',.13);ML.tone(f*2,ML.now()+.02,.35,'sine',.05)}
-function oops(){streak=0;ML.sfx.boing();react('oops',{chance:.4,delay:500})}
+function oops(){if(g.Host)g.Host.oops();streak=0;ML.sfx.boing();react('oops',{chance:.4,delay:500})}
 
 const api={
   get W(){return W},get H(){return H},get ctx(){return ctx},get t(){return t},get level(){return Stage.level},
@@ -186,7 +186,7 @@ function win(o){
   if(next>=0){S.stickers.push(def.id+'_'+next);sticker=def.stickers[next]}
   S.lv[def.id]=Math.min(def.levels-1,(S.lv[def.id]||0)+1);
   ML.save();ML.questEvent('game');if(def.cat!=='more')ML.questEvent('learn');
-  confetti(W,90);ML.sfx.fanfare();react('cheer',{delay:700});
+  if(g.Host)g.Host.winDance();confetti(W,90);ML.sfx.fanfare();react('cheer',{delay:700});
   say(sticker?'new_sticker':ML.pick(['great_job','well_done','super','wow']));
   const box=$('gwin');box.hidden=false;
   box.querySelector('.wstars').textContent='⭐'.repeat(stars);
@@ -210,6 +210,7 @@ Stage.open=function(id){
   $('hub').hidden=true;$('gwin').hidden=true;cv.hidden=false;$('gtop').hidden=false;
   ML.S.scene='games';
   resize();
+  if(g.Host)g.Host.start(id);
   Stage.inst=def.create(api);
   if(Stage.inst.init)Stage.inst.init();
   $('gtitle').textContent=def.icon+' L'+(Stage.level+1);
@@ -232,6 +233,7 @@ function loop(now){
   ctx.textAlign='center';ctx.textBaseline='middle';
   if(Stage.inst)Stage.inst.draw(ctx);
   drawFx(ctx);
+  if(g.Host)g.Host.frame(dt);
 }
 $('gexit').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ML.sfx.pop();Stage.close()});
 $('gsay').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ML.unlock();if(promptFn)promptFn()});
