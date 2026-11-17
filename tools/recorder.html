@@ -38,7 +38,7 @@
 </style>
 </head>
 <body>
-<header><h1>🎙️ Magic Land voice recorder</h1><select id="mode"><option value="core">Core lines first (about 100)</option><option value="all">All lines</option></select><div class="bar"><i id="pbar"></i></div><div id="pcount"></div></header>
+<header><h1>🎙️ Magic Land voice recorder</h1><select id="mode"><option value="core">Core lines first (about 100)</option><option value="all">All lines</option><option value="redo">Redo list</option></select><div class="bar"><i id="pbar"></i></div><div id="pcount"></div></header>
 <main>
   <div class="card">
     <div class="cat" id="cat"></div>
@@ -65,7 +65,7 @@
 <script src="../js/phrases.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-let have=new Set(),cur=0,ac=null,stream=null,node=null,src=null,chunks=[],recording=false,playAudio=null;
+let have=new Set(),cur=0,ac=null,stream=null,node=null,src=null,chunks=[],recording=false,playAudio=null,stopping=false;
 let P=PHRASES;
 
 async function loadClips(){try{have=new Set(await (await fetch('/api/clips')).json())}catch(e){$('status').textContent='⚠️ Start the helper first: node tools/record-server.js'}}
@@ -105,14 +105,22 @@ function encodeWav(f32,rate){
   return buf;
 }
 async function stopRec(){
-  recording=false;$('rec').classList.remove('on');$('rec').innerHTML='● Record <small>(space)</small>';$('meter').style.width='0';
+  if(stopping)return;stopping=true;$('status').textContent='Finishing…';
+  await new Promise(r=>setTimeout(r,350));   // keep listening a moment: the last word is never cut
+  stopping=false;recording=false;$('rec').classList.remove('on');$('rec').innerHTML='● Record <small>(space)</small>';$('meter').style.width='0';
   try{src.disconnect();node.disconnect()}catch(e){}
   let n=0;chunks.forEach(c=>n+=c.length);const all=new Float32Array(n);let o=0;chunks.forEach(c=>{all.set(c,o);o+=c.length});
-  // trim silence at both ends, keep a little breathing room, normalise
-  const thr=.02,pad=Math.round(ac.sampleRate*.08);let a=0,b=all.length-1;
-  while(a<b&&Math.abs(all[a])<thr)a++;while(b>a&&Math.abs(all[b])<thr)b--;
-  a=Math.max(0,a-pad);b=Math.min(all.length-1,b+pad*2);
-  if(b-a<ac.sampleRate*.15){$('status').textContent='That was too quiet or too short. Try again.';return}
+  // trim silence at both ends using a 10ms loudness envelope (soft starts/ends are kept), drop the key-click, leave breathing room
+  const sr=ac.sampleRate,W=Math.round(sr*.01),nw=Math.floor(all.length/W),env=new Float32Array(nw);let pk0=0;
+  for(let k=0;k<nw;k++){let s2=0;for(let i=k*W;i<(k+1)*W;i++)s2+=all[i]*all[i];env[k]=Math.sqrt(s2/W);pk0=Math.max(pk0,env[k])}
+  const lo=Math.max(.003,pk0*.03),hi=pk0*.12;let ka=0,kb=nw-1;
+  // key click: a burst under 60ms followed by 200ms+ of quiet, right at the start
+  let j=0;while(j<nw&&env[j]<hi)j++;let j2=j;while(j2<nw&&env[j2]>=hi)j2++;
+  if(j<8&&j2-j<=6){let q=j2;while(q<nw&&env[q]<hi)q++;if(q-j2>=20)ka=q}
+  if(!ka)while(ka<nw&&env[ka]<lo)ka++;
+  while(kb>ka&&env[kb]<lo)kb--;
+  let a=Math.max(0,ka*W-Math.round(sr*.1)),b=Math.min(all.length-1,(kb+1)*W+Math.round(sr*.25));
+  if(b-a<sr*.15){$('status').textContent='That was too quiet or too short. Try again.';return}
   const seg=all.slice(a,b+1);let pk=0;for(let i=0;i<seg.length;i++)pk=Math.max(pk,Math.abs(seg[i]));
   const gain=pk>0?.9/pk:1;for(let i=0;i<seg.length;i++)seg[i]*=gain;
   // short fade in/out so there are no clicks
@@ -133,9 +141,10 @@ $('play').onclick=()=>playClip(P[cur].id);
 $('prev').onclick=()=>{if(cur>0){cur--;render()}};
 $('next').onclick=()=>{if(cur<P.length-1){cur++;render()}};
 addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();$('rec').click()}else if(e.code==='ArrowRight')$('next').click();else if(e.code==='ArrowLeft')$('prev').click()});
-function setMode(m){try{localStorage.setItem('recmode',m)}catch(e){}P=m==='all'?PHRASES:PHRASES.filter(p=>CORE.has(p.id));const i=P.findIndex(p=>!have.has(p.id));cur=i<0?0:i;render()}
+let REDO=[];
+function setMode(m){try{localStorage.setItem('recmode',m)}catch(e){}P=m==='all'?PHRASES:m==='redo'?PHRASES.filter(p=>REDO.includes(p.id)):PHRASES.filter(p=>CORE.has(p.id));const i=m==='redo'?0:P.findIndex(p=>!have.has(p.id));cur=i<0?0:i;render()}
 $('mode').onchange=e=>setMode(e.target.value);
-loadClips().then(()=>{let m='core';try{m=localStorage.getItem('recmode')||'core'}catch(e){}$('mode').value=m;setMode(m)});
+loadClips().then(async()=>{try{REDO=await (await fetch('/tools/redo.json')).json()}catch(e){}let m='core';try{m=localStorage.getItem('recmode')||'core'}catch(e){}$('mode').value=m;setMode(m)});
 </script>
 </body>
 </html>

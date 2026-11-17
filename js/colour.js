@@ -116,14 +116,14 @@ function startDraw(){
 
 /* ---------- picture picker ---------- */
 let pickCat=0;
-function openPicker(){
-  const pk=$('apick');pk.hidden=false;pk.innerHTML='';
+function openPicker(quiet){
+  const pk=$('apick');pk.hidden=false;pk.innerHTML='';if(!quiet)ML.say('Pick a picture!');
   const card=el('div','acard',null,pk);
   const bar=el('div','abar',null,card);
   tap(el('button','mx','✖',bar),()=>{ML.sfx.pop();pk.hidden=true;if(!st.started)close()});
   el('div','atitle','Pick a picture',bar);
   const cats=el('div','acats',null,card);
-  g.ArtLib.cats.forEach((c,i)=>{const b=el('button','acat'+(i===pickCat?' on':''),c.emoji,cats);tap(b,()=>{pickCat=i;ML.sfx.pop();ML.say(c.name+'!');openPicker()})});
+  g.ArtLib.cats.forEach((c,i)=>{const b=el('button','acat'+(i===pickCat?' on':''),c.emoji,cats);tap(b,()=>{pickCat=i;ML.sfx.pop();ML.say(c.name+'!');openPicker(true)})});
   const grid=el('div','athumbs',null,card);
   const cat=g.ArtLib.cats[pickCat];
   cat.items.forEach(item=>{

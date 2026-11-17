@@ -66,7 +66,7 @@
    ['Go and play a learning game!'],['Paint with your magic!']].forEach((a,i)=>add('quest'+i,a[0],'A Quests'));
 
   /* ---- colouring ---- */
-  [['draw_time','Draw anything you like!'],['colour_time','Pick a colour and tap to fill!'],['photo_time','Choose a photo to colour in!'],['saved_pic','I saved your picture!'],
+  [['draw_time','Draw anything you like!'],['colour_time','Pick a colour and tap to fill!'],['photo_time','Choose a photo to colour in!'],['pick_picture','Pick a picture!'],['saved_pic','I saved your picture!'],
    ['cat_dino','Dinosaurs!'],['cat_animals','Animals!'],['cat_mermaid','Mermaids!'],['cat_magic','Unicorns!'],['cat_ocean','Ocean!'],['cat_space','Space!'],['cat_vehicles','Vehicles!'],['cat_garden','Garden!']]
    .forEach(a=>add(a[0],a[1],'B Colouring'));
 
