@@ -105,3 +105,6 @@ On the "Who do you want to be?" screen (🔄 button), **hold** the 🔁 Start ov
 
 ## Happy sounds
 The `C Sounds` lines (giggles, cheers, gasps, aww, mmm, uh-oh) are not spoken words. The game plays them as little reactions after wins, wrong answers, feeding, cuddling friends and catching stars. A higher-pitched copy is used as the pets' voice. Record them with `node tools/record-server.js`, then open `http://localhost:8766/tools/recorder.html?mode=redo`.
+
+## Sound polish
+All voice clips play through a small studio chain in `js/voice.js` (warmth/presence EQ, compressor, light room reverb, limiter) and are levelled to the same loudness on load. Each friend has its own silly pitch (from its name) and babbles with your giggles and cheers; tapping a friend or opening its card plays it. Counting plays a rising chime. The meadow music pauses while someone is talking.

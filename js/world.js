@@ -146,6 +146,7 @@ const sfx={
 };
 function music(){
   if(!AC||!S.sound||S.t<musicNext||S.scene==='games')return;
+  if(window.Voice&&Voice.speaking&&Voice.speaking())return;   // music rests while someone is talking
   mi=clamp(mi+pick([-2,-1,-1,1,1,2]),-2,9);
   tone(nf(mi),now(),1.6,'triangle',.045);
   if(Math.random()<.3)tone(nf(mi)/2,now(),2,'sine',.03);
@@ -250,7 +251,7 @@ function tapAt(w){
   if(hit(CAR,150,90)&&S.carCool<=0){carouselRide();return}
 }
 function react(grp,o){try{return !!(window.Voice&&Voice.react(grp,o))}catch(e){return false}}
-function animalSound(a){if(react('laugh',{chance:.6,delay:0,rate:1.3+Math.random()*.35}))return;a.e==='🐱'?sfx.mew():a.e==='🐶'?sfx.blip():sfx.pop()}
+function animalSound(a){if(window.Voice&&Voice.petVoice(a,'tap'))return;a.e==='🐱'?sfx.mew():a.e==='🐶'?sfx.blip():sfx.pop()}
 
 /* ---------- buttons ---------- */
 function choose(c){
@@ -973,7 +974,7 @@ function endLearn(){
 function openPet(a){
   if(S.scene&&S.scene!=='modal')return;
   if(!a){const f=animals.filter(x=>x.follow);if(!f.length){toast('Make a friend first! 🐰',2200);say('Make a friend first!');return}a=f[0]}
-  S.scene='modal';held=false;PET=a;$('modal').hidden=false;petRender();say(a.name+'!');
+  S.scene='modal';held=false;PET=a;$('modal').hidden=false;petRender();say(a.name+'!');if(window.Voice)Voice.petVoice(a,'name');
 }
 function petRender(){
   const a=PET,box=$('mbox');box.innerHTML='';
@@ -989,7 +990,7 @@ function petRender(){
 }
 function petCare(icon,line){
   const a=PET;if(!a)return;
-  a.happy=Math.min(5,a.happy+1);sfx.collect();say(line);react('cuddle',{delay:900,rate:1.25});
+  a.happy=Math.min(5,a.happy+1);sfx.collect();say(line);if(!(window.Voice&&Voice.petVoice(a,'happy')))react('cuddle',{delay:900,rate:1.25});
   const pb=$('pbig');pb.classList.remove('wig');void pb.offsetWidth;pb.classList.add('wig');
   for(let i=0;i<6;i++){const s=el('span','fx',icon,$('mbox'));s.style.left=(25+Math.random()*50)+'%';s.style.animationDelay=(i*.08)+'s';setTimeout(()=>s.remove(),1500)}
   document.querySelectorAll('.phearts span').forEach((h,i)=>{h.textContent=i<a.happy?'💖':'🤍'});

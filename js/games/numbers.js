@@ -62,7 +62,7 @@ create(A){
     down(x,y){
       if(phase==='count'){
         for(const it of items)if(!it.counted&&Math.hypot(it.x-x,it.y-it.sz*.1-y)<it.sz*.62){
-          cnt++;it.counted=cnt;it.hop=1;A.tween(it,{hop:0},400);A.sfx.pop();A.say(...A.numWords(cnt));A.burst(it.x,it.y,6,['#fff','#ffe66d']);
+          cnt++;it.counted=cnt;it.hop=1;A.tween(it,{hop:0},400);A.chime(cnt);A.say(...A.numWords(cnt));A.burst(it.x,it.y,6,['#fff','#ffe66d']);
           if(cnt===n)A.later(900,ask);return}
       }else if(phase==='answer'&&btns)btns.down(x,y);
     },
@@ -92,7 +92,7 @@ create(A){
       const near=Math.abs(it.x-plate.x)<plate.rx*1.2&&Math.abs(it.y-plate.y)<plate.ry*2.6;
       if(near&&got<need){
         got++;it.locked=true;const k=got-1,cols=Math.min(need,5),px=plate.x+(k%cols-(Math.min(need,cols)-1)/2)*Math.min(44,plate.rx*1.6/cols),py=plate.y-Math.floor(k/cols)*26-8;
-        A.tween(it,{x:px,y:py,s:.62},220,{ease:A.easeBack});A.sfx.pop();A.say(...A.numWords(got));
+        A.tween(it,{x:px,y:py,s:.62},220,{ease:A.easeBack});A.chime(got);A.say(...A.numWords(got));
         if(got===need)A.later(700,eatIt);
       }else if(near){A.oops();A.say('too_many');A.tween(it,{x:it.hx,y:it.hy},300)}
       else A.tween(it,{x:it.hx,y:it.hy},300,{ease:A.easeBack});
@@ -283,7 +283,7 @@ create(A){
     if(op==='-'){gr.forEach(it=>A.tween(it,{sz:0},400))}
     const keep=op==='+'?all:gl.slice(0,ans);
     let k=0;
-    (op==='+'?all:gl).forEach((it,i)=>A.later(i*340,()=>{it.hop=1;A.tween(it,{hop:0},300);if(op==='+'||i<ans){k++;A.say(...A.numWords(k))}A.sfx.pop()}));
+    (op==='+'?all:gl).forEach((it,i)=>A.later(i*340,()=>{it.hop=1;A.tween(it,{hop:0},300);if(op==='+'||i<ans){k++;A.say(...A.numWords(k));A.chime(k)}else A.sfx.pop()}));
     A.later((op==='+'?all.length:gl.length)*340+300,()=>{A.burst(A.W/2,A.H*.4,24);round++;A.progress(round,rounds);if(round>=rounds)A.later(800,()=>A.win({stars:3}));else A.later(600,newRound)});
   }
   return{
