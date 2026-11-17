@@ -69,7 +69,10 @@
     if(!V.gain||V.gain.context!==a.ac){V.gain=a.ac.createGain();V.gain.gain.value=1.6;V.gain.connect(a.out||a.ac.destination)}
     let t=a.ac.currentTime+.03;
     bufs.forEach((b,i)=>{
-      const s=a.ac.createBufferSource();s.buffer=b;s.connect(V.gain);s.start(t);V.src.push(s);
+      const s=a.ac.createBufferSource();s.buffer=b;
+      const fg=a.ac.createGain(),f=Math.min(.012,b.duration/4);
+      fg.gain.setValueAtTime(0,t);fg.gain.linearRampToValueAtTime(1,t+f);fg.gain.setValueAtTime(1,t+b.duration-f);fg.gain.linearRampToValueAtTime(0,t+b.duration);
+      s.connect(fg);fg.connect(V.gain);s.start(t);V.src.push(s);
       t+=b.duration+(i<ids.length-1?.04:0);
       if(i===bufs.length-1&&done)s.onended=()=>{if(my===V.token)done()};
     });
