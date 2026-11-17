@@ -19,8 +19,8 @@
     try{
       const inp=ac.createGain(),hp=f('highpass',90),warm=f('lowshelf',220,3),mud=f('peaking',450,-1.5,1),pres=f('peaking',3200,1.5,.8),air=f('highshelf',7000,2);
       const comp=ac.createDynamicsCompressor();comp.threshold.value=-24;comp.knee.value=20;comp.ratio.value=3.5;comp.attack.value=.004;comp.release.value=.18;
-      const make=ac.createGain();make.gain.value=1.5;
-      const lim=ac.createDynamicsCompressor();lim.threshold.value=-3;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=.001;lim.release.value=.06;
+      const make=ac.createGain();make.gain.value=1.25;
+      const lim=ac.createDynamicsCompressor();lim.threshold.value=-6;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=.001;lim.release.value=.06;
       const conv=ac.createConvolver();conv.buffer=impulse(ac);const wet=ac.createGain();wet.gain.value=.13;
       inp.connect(hp);hp.connect(warm);warm.connect(mud);mud.connect(pres);pres.connect(air);air.connect(comp);comp.connect(make);
       make.connect(lim);make.connect(conv);conv.connect(wet);wet.connect(lim);lim.connect(dest);
@@ -34,7 +34,7 @@
     for(let k=0;k<n;k++){let t=0;for(let i=k*W;i<(k+1)*W;i++)t+=d[i]*d[i];e.push(t/W);mx=Math.max(mx,e[k])}
     let sum=0,c=0;for(const x of e)if(x>mx*.1){sum+=x;c++}
     const rms=Math.sqrt(c?sum/c:mx)||.1;
-    return Math.min(2.2,Math.max(.6,.2/rms));
+    return Math.min(1.9,Math.max(.6,.17/rms));
   }
 
   V.init=async function(){
@@ -150,6 +150,8 @@
     ids.forEach((id,i)=>playLater(id,{rate:r*(i?1.12:1),after:i*.18,delay:kind==='name'?900:0,vol:.9}));
     return true;
   };
+  /* how long (seconds) a list of clips takes to speak; 0 if they are not loaded yet */
+  V.dur=function(ids){let t=0;for(const i of ids){const b=V.buf[i];if(!b)return 0;t+=b.duration+.04}return t};
   V.speaking=function(){const a=out();return !!a&&a.ac.currentTime<V.busyUntil};
 
   /* say a sentence: returns true if it was spoken from recordings */

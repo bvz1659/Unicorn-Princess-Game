@@ -81,7 +81,7 @@ create(A){
     const vals=(()=>{const s=new Set([v]);while(s.size<3)s.add(1+Math.floor(Math.random()*(A.level>=1?9:5)));return A.shuffle([...s])})();
     function lay(){const w=Math.min(104,(A.W-40)/3-10);btns=vals.map((n,i)=>({n,x:A.W/2+(i-1)*(w+14),y:A.H*.82,w,shake:0,pop:0}))}
     lay();
-    return{lay,say:()=>{A.say('check_temp');A.later(1500,()=>A.say(...A.numWords(v)))},
+    return{lay,say:()=>{A.say('check_temp');const V=window.Voice,hd=V&&V.has&&V.has('check_temp')?(V.dur(['check_temp'])||1.5):0;A.later(Math.max(1500,hd*1000+350),()=>A.say(...A.numWords(v)))},
       down(x,y){if(lock)return;for(const b of btns)if(Math.abs(b.x-x)<b.w/2+6&&Math.abs(b.y-y)<b.w/2+6){
         if(b.n===v){lock=true;b.pop=1;A.say(...A.numWords(v));A.later(900,next)}else{b.shake=1;A.tween(b,{shake:0},400);A.oops();A.say('try_again')}return}},
       move(){},up(){},
@@ -103,7 +103,7 @@ create(A){
 
   return{
     dbg:()=>({task,idx,order}),
-    init(){A.progress(0,total);A.setPrompt(()=>task&&task.say());A.say('clinic_hello');A.later(2300,start)},
+    init(){A.progress(0,total);A.setPrompt(()=>task&&task.say());A.say('clinic_hello');{const V=window.Voice,hd=V&&V.has&&V.has('clinic_hello')?(V.dur(['clinic_hello'])||3.6):0;A.later(Math.max(2300,hd*1000+450),start)}},
     resize(){if(task&&task.lay)task.lay()},
     update(dt){hop=Math.max(0,hop-dt*1.4)},
     down(x,y){if(task&&!fin)task.down(x,y)},move(x,y){if(task&&!fin)task.move(x,y)},up(x,y){if(task&&!fin)task.up(x,y)},

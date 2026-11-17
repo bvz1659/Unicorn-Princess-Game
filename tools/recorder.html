@@ -119,6 +119,13 @@ async function stopRec(){
   if(j<8&&j2-j<=6){let q=j2;while(q<nw&&env[q]<hi)q++;if(q-j2>=20)ka=q}
   if(!ka)while(ka<nw&&env[ka]<lo)ka++;
   while(kb>ka&&env[kb]<lo)kb--;
+  // keyboard click at the end (pressing Space to stop): a tiny blip after a pause. Drop any such blips.
+  for(let guard=0;guard<4;guard++){
+    const th=pk0*.025,segs=[];let st=-1;
+    for(let k=ka;k<=kb+1;k++){const on=k<=kb&&env[k]>th;if(on&&st<0)st=k;if(!on&&st>=0){if(segs.length&&st-segs[segs.length-1][1]<4)segs[segs.length-1][1]=k;else segs.push([st,k]);st=-1}}
+    if(segs.length<2)break;const L=segs[segs.length-1],Pv=segs[segs.length-2];
+    if(L[1]-L[0]<=4&&L[0]-Pv[1]>=10)kb=Pv[1]+Math.min(25,Math.floor((L[0]-Pv[1])*.6));else break;
+  }
   let a=Math.max(0,ka*W-Math.round(sr*.1)),b=Math.min(all.length-1,(kb+1)*W+Math.round(sr*.25));
   if(b-a<sr*.15){$('status').textContent='That was too quiet or too short. Try again.';return}
   const seg=all.slice(a,b+1);let pk=0;for(let i=0;i<seg.length;i++)pk=Math.max(pk,Math.abs(seg[i]));
