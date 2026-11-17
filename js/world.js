@@ -199,7 +199,7 @@ function firework(x,y){const c=pick([RB,['#fff','#ffe66d','#ffd1f0'],['#4cc9f0',
 
 /* ---------- scoring ---------- */
 function toast(t,ms){const e=$('toast');e.textContent=t;e.classList.add('on');S.msgT=(ms||2000)/1000}
-function hud(){$('stars').textContent='⭐ '+S.stars;$('pals').textContent='🐾 '+animals.filter(a=>a.follow).length}
+function hud(){$('stars').textContent='⭐ '+S.stars;const hs=$('hubStars');if(hs)hs.textContent='⭐ '+S.stars;$('pals').textContent='🐾 '+animals.filter(a=>a.follow).length}
 function addStars(n){
   const before=S.stars;S.stars+=n;hud();save();
   const hit=Math.floor(S.stars/5)>Math.floor(before/5);
@@ -320,6 +320,8 @@ function carouselRide(){
 
 /* ---------- update ---------- */
 function update(dt){
+  // the meadow waits while Learn & Play (or a game) is open: no stars, flowers or friends change behind the screen
+  if(S.scene==='games'){if(S.msgT>0){S.msgT-=dt;if(S.msgT<=0)$('toast').classList.remove('on')}return}
   S.t+=dt;
   for(let i=timers.length-1;i>=0;i--){timers[i].t-=dt;if(timers[i].t<=0){const f=timers[i].fn;timers.splice(i,1);f()}}
   if(S.msgT>0){S.msgT-=dt;if(S.msgT<=0)$('toast').classList.remove('on')}
