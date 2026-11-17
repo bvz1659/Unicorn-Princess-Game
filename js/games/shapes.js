@@ -118,7 +118,7 @@ const PICS=[
 Stage.register({id:'build',cat:'shapes',name:'Build with Shapes',icon:'🏰',color:['#ffd36b','#ff9f4d'],levels:4,stickers:['🦁','🐯','🐻','🐼'],
 create(A){
   const D=A.Draw,pic=PICS[A.level%PICS.length];
-  let slots=[],pieces=[],S=100,cx=0,cy=0,placed=0;
+  let slots=[],pieces=[],S=100,cx=0,cy=0,placed=0,topM=84;
   const drag=A.drag(()=>pieces.slice().sort((a,b)=>(a.z||0)-(b.z||0)),{
     pick:it=>{A.sfx.pop();A.say(it.t)},
     drop:it=>{
@@ -136,7 +136,12 @@ create(A){
     A.later(1100,()=>A.win({stars:3}));
   }
   function layout(){
-    const W=A.W,H=A.H;S=Math.min(W*.46,H*.27);cx=W/2;cy=H*.29;
+    const W=A.W,H=A.H;cx=W/2;
+    // keep the whole picture below the top bar (buttons + host) and above the pieces tray
+    const bar=document.getElementById('gtop');topM=Math.max(84,(bar?bar.getBoundingClientRect().bottom:70)+12);
+    const bot=H*.55,avail=bot-topM-14;let mn=1e9,mx=-1e9;
+    for(const q of pic.slots){const e=q.r*(q.t==='circle'||q.t==='star'?1.08:1.16);mn=Math.min(mn,q.y-e);mx=Math.max(mx,q.y+e)}
+    S=Math.min(W*.46,avail/(mx-mn));cy=topM+7+(-mn)*S+(avail-(mx-mn)*S)/2;
     slots=pic.slots.map((s,i)=>({t:s.t,x:cx+s.x*S,y:cy+s.y*S,r:s.r*S,rot:s.rot||0,done:slots[i]?slots[i].done:false}));
     const n=slots.length,cols=n<=4?n:4,cell=W/cols;
     const order=pieces.length?pieces.map(p=>p.i):A.shuffle(slots.map((s,i)=>i));
@@ -157,7 +162,7 @@ create(A){
     update(){},
     draw(c){
       D.bgFill(c,A.W,A.H,'warm',A.t);
-      c.fillStyle='rgba(255,255,255,.6)';c.beginPath();D.rrect(c,10,A.H*.1,A.W-20,A.H*.44,30);c.fill();
+      c.fillStyle='rgba(255,255,255,.6)';c.beginPath();D.rrect(c,10,topM-4,A.W-20,A.H*.55-topM+8,30);c.fill();
       for(const s of slots)if(!s.done)D.drawShape(c,s.t,s.x,s.y,s.r,{silhouette:true,rot:s.rot});
       c.fillStyle='rgba(255,255,255,.35)';c.beginPath();D.rrect(c,10,A.H*.58,A.W-20,A.H*.38,30);c.fill();
       const arr=pieces.slice().sort((a,b)=>(a.z||0)-(b.z||0)),all=placed===pieces.length;
